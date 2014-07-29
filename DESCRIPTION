@@ -16,4 +16,4 @@ Suggests:
     testthat
 VignetteBuilder: knitr
 LazyData: yes
-Lccense: MIT + file LICENSE
+License: MIT + file LICENSE
