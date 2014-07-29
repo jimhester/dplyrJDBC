@@ -1,3 +1,6 @@
+#' @import dplyr
+NULL
+
 #' Connect to any database with a JDBC driver.
 #'
 #' Use \code{src_JDBC} to connect to an existing database with a JDBC driver,
@@ -94,7 +97,7 @@ src_JDBC <- function(driver, url = NULL, user = NULL, password = NULL, ...) {
 
   user <- user %||% ""
 
-  con <- dbi_connect(driver, url = url %||% "", user = user %||% "",
+  con <- dplyr:::dbi_connect(driver, url = url %||% "", user = user %||% "",
     password = password %||% "", ...)
 
   .jcall(con@jc, "V", "setAutoCommit", FALSE)
@@ -102,7 +105,7 @@ src_JDBC <- function(driver, url = NULL, user = NULL, password = NULL, ...) {
   info <- list(url=url, user=user, driver=.jstrVal(con@jc))
 
   src_sql("JDBC", con,
-    info = info, disco = db_disconnector(con, "JDBC"))
+    info = info, disco = dplyr:::db_disconnector(con, "JDBC"))
 }
 
 #' @export

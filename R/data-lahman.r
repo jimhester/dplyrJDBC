@@ -1,15 +1,27 @@
-lahman_src <- function(type, ...) {
-  switch(type,
-    df = lahman_df(),
-    dt = lahman_dt(),
-    sqlite = src_sqlite(db_location(filename = "lahman.sqlite"), ...),
-    mysql = src_mysql("lahman", ...),
-    monetdb = src_monetdb("lahman", ...),
-    postgres = src_postgres("lahman", ...),
-    JDBC_postgres = src_JDBC(JDBC("org.postgresql.Driver",
-                                  "$PWD/postgresql-9.3.1101.jdbc41.jar"),
-                             "jdbc:postgresql://localhost/lahman_jdbc", identifier.quote="'", ...),
-    bigquery = src_bigquery(Sys.getenv("BIGQUERY_PROJECT"), "lahman", ...),
-    stop("Unknown src type ", type, call. = FALSE)
-  )
+#' @export
+lahman_JDBC <- function(...) {
+  cache_JDBC_postgres(...)
+}
+
+
+cache_JDBC_postgres = function(...) {
+  cache_name <- "lahman_JDBC_postgres"
+  if (dplyr:::is_cached(cache_name)) return(get_cache(cache_name))
+
+  src <- src_JDBC(JDBC("org.postgresql.Driver",
+                       "postgresql-9.3.1101.jdbc41.jar"),
+                  "jdbc:postgresql://localhost/lahman_jdbc", identifier.quote="'", ...)
+
+  tables <- setdiff(dplyr:::lahman_tables(), src_tbls(src))
+
+  # Create missing tables
+  for(table in tables) {
+    df <- getExportedValue("Lahman", table)
+    message("Creating table: ", table)
+
+    ids <- as.list(names(df)[grepl("ID$", names(df))])
+    copy_to(src, df, table, indexes = ids, temporary = FALSE)
+  }
+
+  dplyr:::set_cache(cache_name, src)
 }
