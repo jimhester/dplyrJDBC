@@ -1,4 +1,3 @@
-#' @rdname dplyr::tbl_sql
 #' @export
 tbl_sql <- function(subclass, src, from, ..., vars = NULL) {
   assert_that(is.character(from), length(from) == 1)
